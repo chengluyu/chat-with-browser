@@ -75,6 +75,8 @@ i Usage: 4948 send, 184 recv, 5132 total
 
 ## Get Started
 
+### Environment Variables
+
 Create `.env` file with the following content.
 
 ```
@@ -84,4 +86,9 @@ GOOGLE_SEARCH_KEY=*******************-*******************
 GOOGLE_SEARCH_CX=*****************
 ```
 
-Make sure you have Node.js v20 installed. Run `node index.mjs`.
+Following [this article](https://developers.google.com/custom-search/v1/overview) to get Google Search related keys. Please note that it has a free quota. Charges will be applied once it's used up.
+
+### Run
+
+1. You need to install dependencies first by running `npm install`.
+2. Make sure you have Node.js v20 installed. Run `node index.mjs`.
