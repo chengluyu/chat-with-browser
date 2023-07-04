@@ -1,6 +1,6 @@
-# Chat with Browser
+# Chat with _Your Own_ Browser
 
-This is a simple implementation that allows you to use ChatGPT browsing in your local environment.
+This is a simple implementation that allows you to use ChatGPT browsing in your local environment. The most significant difference between the ChatGPT browsing model and the web version is that it **uses your local browser**. Thus, it can avoid the restrictions faced by crawlers.
 
 ## Showcase
 
