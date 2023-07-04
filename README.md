@@ -2,6 +2,8 @@
 
 This is a simple implementation that allows you to use ChatGPT browsing in your local environment. The most significant difference between the ChatGPT browsing model and the web version is that it **uses your local browser**. Thus, it can avoid the restrictions faced by crawlers.
 
+> :bulb: **Note** The web app made with Next.js is under development.
+
 ## Showcase
 
 Here is an example. I asked ChatGPT to search for a article and provide a simple summary.
