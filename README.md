@@ -100,3 +100,8 @@ Following [this article](https://developers.google.com/custom-search/v1/overview
 
 1. You need to install dependencies first by running `npm install`.
 2. Make sure you have Node.js v20 installed. Run `node index.mjs`.
+
+## Limitations
+
+- `gpt-4-0613` only supports an 8k token context, and in situations of multiple web page accesses, there might be scarcity of token information. Possible solutions include: Deleting unnecessary web page access history, compressing dialogue context, or using `gpt-3.5-turbo-16k-0613`.
+- The current method of summarizing websites is overly simple and blunt (directly conc all text content on the first page). Possible solutions include: Writing specialized content extraction functions for specific websites, or using another LLM to filter out irrelevant information.
