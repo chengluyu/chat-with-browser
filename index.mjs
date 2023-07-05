@@ -7,7 +7,7 @@ import functions, {
   navigate,
   read,
   close,
-  scrollDown,
+  loadMore,
 } from "./functions.mjs";
 
 dotenv.config();
@@ -41,6 +41,7 @@ const messages = [
 
 let shouldStop = false;
 while (!shouldStop) {
+  console.log(`--------------------------------------------------`);
   console.log(`${chalk.green("!")} ${chalk.bold("Waiting for the assistant")}`);
   const response = await client.createChatCompletion({
     model: "gpt-4-0613",
@@ -57,12 +58,12 @@ while (!shouldStop) {
     const choice = response.data.choices[0];
     messages.push(choice.message);
     if (choice.finish_reason === "function_call") {
+      const props = JSON.parse(choice.message.function_call.arguments);
       console.log(
         `${chalk.blue("$")} ${chalk.bold("Assistant called function")}: ${
           choice.message.function_call.name
-        } with arguments ${choice.message.function_call.arguments}`
+        } with ${JSON.stringify(props)}`
       );
-      const props = JSON.parse(choice.message.function_call.arguments);
       switch (choice.message.function_call.name) {
         case "search": {
           const results = await search(props);
@@ -99,7 +100,7 @@ while (!shouldStop) {
           break;
         }
         case "scrollDown": {
-          const result = await scrollDown(props);
+          const result = await loadMore(props);
           messages.push({
             role: "function",
             name: "scrollDown",
@@ -123,19 +124,11 @@ while (!shouldStop) {
           break;
       }
     } else {
-      const usage = response.data.usage;
       console.log(
         `${chalk.green(">")} ${chalk.bold("Assistant responded")}: ${
           choice.message.content
         }`
       );
-      if (usage) {
-        console.log(
-          `${chalk.green("i")} ${chalk.bold("Usage")}: ${
-            usage.prompt_tokens
-          } send, ${usage.completion_tokens} recv, ${usage.total_tokens} total`
-        );
-      }
       const { prompt } = await i.prompt([
         {
           type: "input",
@@ -148,6 +141,15 @@ while (!shouldStop) {
       } else {
         messages.push({ role: "user", content: prompt });
       }
+    }
+    // Display the usage information.
+    const usage = response.data.usage;
+    if (usage) {
+      console.log(
+        `${chalk.green("i")} ${chalk.bold("Usage")}: ${
+          usage.prompt_tokens
+        } send, ${usage.completion_tokens} recv, ${usage.total_tokens} total`
+      );
     }
   }
 }

@@ -101,6 +101,16 @@ Following [this article](https://developers.google.com/custom-search/v1/overview
 1. You need to install dependencies first by running `npm install`.
 2. Make sure you have Node.js v20 installed. Run `node index.mjs`.
 
+## How It Works
+
+This program is fundamentally powered by OpenAI's recently launched function calling feature. Simply put, the function calling feature enables users to provide a number of function signatures and annotations when calling the Chat API. The LLM (Language Learning Model) can interrupt the conversation and invoke these functions, the user can perform the functions locally and put the outcome into the conversation, and LLM can continue the conversation based on the results of the functions. So, without this feature, implementing this program would be more challenging.
+
+Essentially, this program simulates a browser. The browser provides the following interfaces: Google search, opening a new tab, reading a certain tab, and closing a certain tab. At the start of the conversation, the program will inform the LLM in the role of the system: you can access the Internet through these functions, and if you are unclear about what the user is saying, you can use the Google search function.
+
+Meanwhile, we have also implemented specialized readers for specific websites (see `readers` folder). These readers can selectively feed meaningful web page content to the LLM. For the remaining websites, we simulate the process of reading a webpage like a human: copying all the text content on the first screen, while also informing the LLM that it can scroll the window to continue reading.
+
+Although this model is very simple, it has proven to be extremely effective in my practice.
+
 ## Limitations
 
 - `gpt-4-0613` only supports an 8k token context, and in situations of multiple web page accesses, there might be scarcity of token information. Possible solutions include: Deleting unnecessary web page access history, compressing dialogue context, or using `gpt-3.5-turbo-16k-0613`.

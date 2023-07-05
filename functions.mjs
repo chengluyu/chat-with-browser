@@ -1,5 +1,6 @@
 import puppeteer from "puppeteer";
 import { nanoid } from "nanoid";
+import * as reader from "./readers/index.mjs";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -7,7 +8,7 @@ dotenv.config();
 /** @type {import("puppeteer").Browser | null} */
 let browser = null;
 
-/** @type {Map<string, import("puppeteer").Page>} */
+/** @type {Map<string, { page: import("puppeteer").Page, context: Record<string, unknown> }>} */
 const tabMap = new Map();
 
 export async function search({ query }) {
@@ -33,104 +34,53 @@ export async function navigate({ url }) {
     browser = await puppeteer.launch({ headless: "new" });
   }
   const page = await browser.newPage();
-  page.setViewport({ width: 1440, height: 900 })
+  page.setViewport({ width: 1440, height: 900 });
   await page.goto(url);
   const id = nanoid();
-  tabMap.set(id, page);
+  tabMap.set(id, { page, context: {} });
   return { ok: true, tab: id };
 }
 
-export async function read({ tab }) {
-  const page = tabMap.get(tab);
-  if (page === undefined) {
+/**
+ * @param {{ tab: string }} args
+ */
+export async function read({ tab: tabId }) {
+  const tab = tabMap.get(tabId);
+  if (tab === undefined) {
     return { ok: false, message: "Tab not found." };
   } else {
-    const content = await page.evaluate(() => {
-      function isVisibleInViewport(el) {
-        const rect = el.getBoundingClientRect();
-        const unwantedTags = [
-          "SCRIPT",
-          "STYLE",
-          "NOSCRIPT",
-          "TEMPLATE",
-          "META",
-          "LINK",
-        ];
-
-        if (unwantedTags.includes(el.tagName)) {
-          return false;
-        }
-
-        return (
-          rect.top <
-            (window.innerHeight || document.documentElement.clientHeight) &&
-          rect.left <
-            (window.innerWidth || document.documentElement.clientWidth) &&
-          rect.bottom > 0 &&
-          rect.right > 0
-        );
-      }
-
-      function getVisibleText(node) {
-        let text = "";
-        if (node.nodeType === Node.TEXT_NODE) {
-          text += node.textContent;
-        } else if (
-          node.nodeType === Node.ELEMENT_NODE &&
-          isVisibleInViewport(node)
-        ) {
-          for (let i = 0; i < node.childNodes.length; i++) {
-            const childText = getVisibleText(node.childNodes[i]);
-            if (childText) {
-              // Add a space to separate text from different child nodes.
-              text += " " + childText;
-            }
-          }
-        }
-        // Trim leading and trailing spaces, and replace multiple spaces with a single space.
-        return text.replace(/\s+/g, " ").trim();
-      }
-
-      return getVisibleText(document.body);
-    });
-    return { ok: true, content };
+    const { page, context } = tab;
+    return { ok: true, content: await reader.read(page, context) };
   }
 }
 
-export async function scrollDown({ tab }) {
-  const page = tabMap.get(tab);
-  if (page === undefined) {
+/**
+ * @param {{ tab: string }} args
+ */
+export async function loadMore({ tab: tabId }) {
+  const tab = tabMap.get(tabId);
+  if (tab === undefined) {
     return { ok: false, message: "Tab not found." };
   } else {
-    const canScrollMore = await page.evaluate(() => {
-      const beforeScrollY = window.scrollY;
-      window.scrollBy(0, window.innerHeight);
-
-      return new Promise((resolve) => {
-        // Wait for the scroll to finish.
-        setTimeout(() => {
-          // Check if this is the last screen by comparing the scroll position with the total scrollable height.
-          if (
-            beforeScrollY + window.innerHeight >=
-            document.body.scrollHeight
-          ) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        }, 100); // Set a small timeout to allow the scroll to finish.
-      });
-    });
-    return { ok: true, canScrollMore };
+    const { page, context } = tab;
+    try {
+      const hasMoreContent = await reader.loadMore(page, context);
+      return { ok: true, hasMoreContent };
+    } catch (e) {
+      return { ok: false, message: e.message };
+    }
   }
 }
 
-export async function close({ tab }) {
-  const page = tabMap.get(tab);
-  if (page === undefined) {
+/**
+ * @param {{ tab: string }} args
+ */
+export async function close({ tab: tabId }) {
+  const tab = tabMap.get(tabId);
+  if (tab === undefined) {
     return { ok: false, message: "Tab not found." };
   } else {
-    await page.close();
+    await tab.page.close();
     tabMap.delete(tab);
     return { ok: true, message: "Tab closed." };
   }
