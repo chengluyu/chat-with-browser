@@ -1,7 +1,9 @@
 import pmc from "./pmc.mjs";
 import fallback from "./fallback.mjs";
+import spandidos from "./spandidos.mjs";
+import nature from "./nature.mjs";
 
-const readers = [pmc, fallback];
+const readers = [pmc, spandidos, nature, fallback];
 
 /**
  * Try to find a reader for the given web page.
@@ -12,7 +14,7 @@ const readers = [pmc, fallback];
 export function read(page, context) {
   for (const { name, urlPattern, read } of readers) {
     if (urlPattern.test(page.url())) {
-      console.log(`Read with reader "${name}"`)
+      console.log(`Read with reader "${name}"`);
       return read(page, context);
     }
   }
@@ -28,7 +30,7 @@ export function read(page, context) {
 export function loadMore(page, context) {
   for (const { name, urlPattern, loadMore } of readers) {
     if (urlPattern.test(page.url())) {
-      console.log(`Load more with reader "${name}"`)
+      console.log(`Load more with reader "${name}"`);
       return loadMore(page, context);
     }
   }

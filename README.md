@@ -2,7 +2,8 @@
 
 This is a simple implementation that allows you to use ChatGPT browsing in your local environment. The most significant difference between the ChatGPT browsing model and the web version is that it **uses your local browser**. Thus, it can avoid the restrictions faced by crawlers.
 
-> :bulb: **Note** The web app made with Next.js is under development.
+> **Note**
+> An web app made with Next.js is under development.
 
 ## Showcase
 
@@ -94,12 +95,16 @@ GOOGLE_SEARCH_KEY=*******************-*******************
 GOOGLE_SEARCH_CX=*****************
 ```
 
-Following [this article](https://developers.google.com/custom-search/v1/overview) to get Google Search related keys. Please note that it has a free quota. Charges will be applied once it's used up.
+Following [this article](https://developers.google.com/custom-search/v1/overview) to get Google Search related keys.
+
+> **Warning**
+> The Google Search API has a free quota. Charges will be applied once it's used up
 
 ### Run
 
 1. You need to install dependencies first by running `npm install`.
 2. Make sure you have Node.js v20 installed. Run `node index.mjs`.
+3. Write some prompts, for example: `Find the DOI of paper "Single-particle imaging of macromolecules by cryo-electron microscopy"`.
 
 ## How It Works
 
@@ -115,3 +120,11 @@ Although this model is very simple, it has proven to be extremely effective in m
 
 - `gpt-4-0613` only supports an 8k token context, and in situations of multiple web page accesses, there might be scarcity of token information. Possible solutions include: Deleting unnecessary web page access history, compressing dialogue context, or using `gpt-3.5-turbo-16k-0613`.
 - The current method of summarizing websites is overly simple and blunt (directly conc all text content on the first page). Possible solutions include: Writing specialized content extraction functions for specific websites, or using another LLM to filter out irrelevant information.
+
+## Findings
+
+Sometimes, for extended context, we utilize the GPT-3.5 Turbo model. However, after comparison, we've found that GPT-4 indeed appears more "intelligent". This is reflected in several ways.
+
+1. GPT-4, after browsing, remembers to close the tabs, something that GPT-3.5 often forgets.
+2. GPT-3.5 sometimes continues to scroll through a webpage without actually reading it. We're considering disabling the scrolling feature and using only a read function in the hope of potentially reducing GPT-3.5's comprehension cost.
+3. GPT-4 knows when to stop reading, while GPT-3.5 either sometimes reads excessively or does not read the entire text at all.
