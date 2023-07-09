@@ -4,7 +4,7 @@
  * @param {Record<string, unknown>} context the reader context
  * @returns {Promise<string>}
  */
-async function read(page) {
+async function read(page, context) {
   const content = await page.evaluate(() => {
     function isVisibleInViewport(el) {
       const rect = el.getBoundingClientRect();
@@ -53,7 +53,15 @@ async function read(page) {
 
     return getVisibleText(document.body);
   });
-  return content;
+  if (context.hasRead) {
+    return { textContent: content };
+  } else {
+    context.hasRead = true;
+    return {
+      title: await page.evaluate(() => document.title),
+      textContent: content,
+    };
+  }
 }
 
 /**
@@ -62,7 +70,7 @@ async function read(page) {
  * @param {Record<string, unknown>} context the reader context
  * @returns {Promise<boolean>}
  */
-async function loadMore(page) {
+async function loadMore(page, context) {
   const canScrollMore = await page.evaluate(() => {
     const beforeScrollY = window.scrollY;
     window.scrollBy(0, window.innerHeight);
