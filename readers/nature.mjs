@@ -44,7 +44,7 @@ async function read(page, context) {
     if (nextSectionIndex < sections.length) {
       const section = sections[nextSectionIndex];
       context.nextSectionIndex++;
-      console.log(`Send the following secton: ${section.slice(0, 200)}`);
+      // console.log(`Send the following secton: ${section.slice(0, 200)}`);
       return section;
     } else {
       return null;
