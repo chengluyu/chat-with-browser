@@ -2,14 +2,21 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkStringify from "remark-stringify";
+// import { inspect } from "node:util";
 
 /**
  *
  * @param {string} markdown
  * @returns {string[]}
  */
-export default function sectionize(markdown) {
-  const root = unified().use(remarkParse).use(remarkGfm).parse(markdown);
+export default function sectionize(markdown, preprocess) {
+  let root = unified().use(remarkParse).use(remarkGfm).parse(markdown);
+
+  if (typeof preprocess === "function") {
+    root = preprocess(root);
+  }
+
+  // console.log(inspect(root, { depth: null }))
 
   const sections = [];
   let section = [];

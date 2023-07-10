@@ -1,9 +1,10 @@
 import pmc from "./pmc.mjs";
 import fallback from "./fallback.mjs";
 import spandidos from "./spandidos.mjs";
+import scienceDirect from "./sciencedirect.mjs";
 import nature from "./nature.mjs";
 
-const readers = [pmc, spandidos, nature, fallback];
+const readers = [pmc, spandidos, scienceDirect, nature, fallback];
 
 /**
  * Try to find a reader for the given web page.
