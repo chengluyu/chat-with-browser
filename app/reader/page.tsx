@@ -9,6 +9,7 @@ import { markdown } from "@codemirror/lang-markdown";
 import { EditorState } from "@codemirror/state";
 import { Noto_Sans_Mono } from "next/font/google";
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 
 const bodySchema = z.object({
   metadata: z.object({
@@ -41,13 +42,7 @@ export default function HomePage() {
   }, []);
   return (
     <>
-      <header className="flex-shrink-0 px-2 h-10 flex flex-row items-center border-b gap-8 border-stone-400">
-        <div className="font-bold text-xl">Chat with Browser</div>
-        <nav className="flex flex-row items-center gap-4">
-          <Link className="font-bold text-lg text-stone-600" href="/chat">Chat</Link>
-          <div className="font-bold text-lg text-red-600">Reader Test</div>
-        </nav>
-      </header>
+      <PageHeader />
       <form
         className="flex-shrink-0 px-2 h-12 flex flex-row items-center gap-2 border-b-2 border-stone-400"
         onSubmit={handleSubmit(async (data) => {

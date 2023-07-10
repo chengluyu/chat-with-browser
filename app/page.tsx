@@ -5,6 +5,7 @@ export default function HomePage() {
     <>
       <Link href="/chat">Chat</Link>
       <Link href="/reader">Reader Test</Link>
+      <Link href="/bibtex">BibTeX Converter</Link>
     </>
   );
 }
