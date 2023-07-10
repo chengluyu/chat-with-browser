@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Work_Sans as WorkSans } from 'next/font/google'
+import { Public_Sans as PublicSans } from 'next/font/google'
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Chat with your own Browser",
 }
 
-const workSans = WorkSans({ subsets: ["latin"], display: "auto" })
+const publicSans = PublicSans({ subsets: ["latin"], display: "auto" })
 
 export default function RootLayout({
   children,
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={workSans.className}>
+    <html lang="en" className={publicSans.className}>
       <body className="flex flex-col w-screen h-screen">{children}</body>
     </html>
   )

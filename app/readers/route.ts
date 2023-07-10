@@ -7,7 +7,7 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error("Missing Environment Variable OPENAI_API_KEY");
 }
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 const bodySchema = z.object({
   url: z.string().url(),
@@ -20,13 +20,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: "networkidle0" });
     const context = {};
-    const results = [];
-    results.push(await read(page, context));
+    const sections = [];
+    const metadata = await read(page, context);
     while (await loadMore(page, context)) {
-      results.push(await read(page, context));
+      sections.push(await read(page, context));
     }
     await page.close();
-    const responseBody = JSON.stringify({ results });
+    const responseBody = JSON.stringify({ metadata, sections });
     return new NextResponse(responseBody);
   } catch (error) {
     const responseBody = JSON.stringify({

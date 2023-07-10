@@ -26,13 +26,15 @@ async function read(page, context) {
 
       const sections = Array.from(mainContentEl.querySelectorAll(".tsec.sec"));
       const abstract = sections.filter((el) => el.id.match(/^abstract-\d+$/));
-      const mainSections = sections.filter((el) => el.id.match(/^sec-\d+$/));
+      const mainSections = sections.filter((el) =>
+        el.id.match(/^(?:body|sec)-\d+$/)
+      );
       const abstractHTML = abstract
-        .map(extractSection)
+        .map((el) => extractSection(el, 2))
         .map((s) => s.contentHTML)
         .join("\n");
       const contentHTML = mainSections
-        .map(extractSection)
+        .map((el) => extractSection(el, 2))
         .map((s) => s.headingHTML + "\n" + s.contentHTML)
         .join("\n");
       return {
@@ -46,21 +48,32 @@ async function read(page, context) {
         contentHTML,
       };
 
-      function extractSection(el) {
-        const heading = el.querySelector("h2");
+      function extractSection(el, level) {
+        const heading = el.querySelector(`h${level}`);
         const paragraphs = [];
         let current = el.id.startsWith("abstract-")
           ? heading.nextElementSibling.firstElementChild
           : heading.nextElementSibling;
         while (current !== null) {
           if (current.tagName === "P") {
-            paragraphs.push(current);
+            paragraphs.push(current.outerHTML);
+          } else if (
+            current.tagName === "DIV" &&
+            current.id.startsWith("sec-")
+          ) {
+            const { headingHTML, contentHTML } = extractSection(
+              current,
+              level + 1
+            );
+            paragraphs.push(headingHTML + "\n\n" + contentHTML);
           }
           current = current.nextElementSibling;
         }
         return {
-          headingHTML: heading.outerHTML,
-          contentHTML: paragraphs.map((p) => p.outerHTML).join("\n"),
+          headingHTML: heading.classList.contains("headless")
+            ? ""
+            : heading.outerHTML,
+          contentHTML: paragraphs.join("\n"),
         };
       }
     });
@@ -71,8 +84,8 @@ async function read(page, context) {
       contentMarkdown,
       removeCitations.bind(
         null,
-        /^(?:\w+?, \d\d\d\d|Fig. \d+\w+)$/,
-        /^(?:#R\d+|\/pmc\/articles\/PMC\d+\/figure\/\w+\/)$/
+        /^(?:[\w -]+?(?:et al\.)? \d\d\d\d|Fig. \d+\w+)$/,
+        /^(?:#[BR]\d+|\/pmc\/articles\/PMC\d+\/figure\/\w+\/)$/
       )
     );
     context.nextSectionIndex = 0;
