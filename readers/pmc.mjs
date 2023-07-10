@@ -1,8 +1,9 @@
-import TurndownService from "turndown";
+// import TurndownService from "turndown";
 import sectionize from "../helpers/sectionize.mjs";
 import removeCitations from "../helpers/rm-cite.mjs";
+import toMarkdown from "../helpers/to-markdown.mjs";
 
-const turndownService = new TurndownService();
+// const turndownService = new TurndownService();
 
 /**
  * Read content from PubMed Central.
@@ -13,7 +14,7 @@ const turndownService = new TurndownService();
 async function read(page, context) {
   // First time? Get metadata.
   if (!("metadata" in context)) {
-    const { metadata, contentHTML } = await page.evaluate(() => {
+    const { metadata, abstractHTML, contentHTML } = await page.evaluate(() => {
       const mainContentEl = document.querySelector("#mc");
       if (mainContentEl === null) {
         return null;
@@ -22,29 +23,49 @@ async function read(page, context) {
       const identifiers = mainContentEl.querySelector(".fm-ids").textContent;
       const title = mainContentEl.querySelector(".content-title").textContent;
       const authors = mainContentEl.querySelector(".fm-author").textContent;
-      let abstract = "";
-      for (const node of mainContentEl.querySelectorAll("#abstract-1 p")) {
-        abstract += node.textContent.trim() + "\n";
-      }
-      const abstractEl = mainContentEl.querySelector("#abstract-1");
-      let contentHTML = "";
-      let node = abstractEl.nextElementSibling;
-      while (node !== null && node.id.length > 0) {
-        contentHTML += node.outerHTML;
-        node = node.nextElementSibling;
-      }
+
+      const sections = Array.from(mainContentEl.querySelectorAll(".tsec.sec"));
+      const abstract = sections.filter((el) => el.id.match(/^abstract-\d+$/));
+      const mainSections = sections.filter((el) => el.id.match(/^sec-\d+$/));
+      const abstractHTML = abstract
+        .map(extractSection)
+        .map((s) => s.contentHTML)
+        .join("\n");
+      const contentHTML = mainSections
+        .map(extractSection)
+        .map((s) => s.headingHTML + "\n" + s.contentHTML)
+        .join("\n");
       return {
         metadata: {
           source,
           identifiers,
           title,
           authors,
-          abstract,
         },
+        abstractHTML,
         contentHTML,
       };
+
+      function extractSection(el) {
+        const heading = el.querySelector("h2");
+        const paragraphs = [];
+        let current = el.id.startsWith("abstract-")
+          ? heading.nextElementSibling.firstElementChild
+          : heading.nextElementSibling;
+        while (current !== null) {
+          if (current.tagName === "P") {
+            paragraphs.push(current);
+          }
+          current = current.nextElementSibling;
+        }
+        return {
+          headingHTML: heading.outerHTML,
+          contentHTML: paragraphs.map((p) => p.outerHTML).join("\n"),
+        };
+      }
     });
-    const contentMarkdown = turndownService.turndown(contentHTML);
+    const contentMarkdown = await toMarkdown(contentHTML);
+    metadata.abstract = await toMarkdown(abstractHTML);
     context.metadata = metadata;
     context.sections = sectionize(
       contentMarkdown,

@@ -1,7 +1,8 @@
-import TurndownService from "turndown";
+// import TurndownService from "turndown";
 import sectionize from "../helpers/sectionize.mjs";
+import toMarkdown from "../helpers/to-markdown.mjs";
 
-const turndownService = new TurndownService();
+// const turndownService = new TurndownService();
 // const markdown = turndownService.turndown("<h1>Hello world!</h1>");
 
 /**
@@ -34,7 +35,7 @@ async function read(page, context) {
         contentHTML: articleBodyEl.querySelector(".main-content").innerHTML,
       };
     });
-    const contentMarkdown = turndownService.turndown(contentHTML);
+    const contentMarkdown = toMarkdown(contentHTML);
     context.metadata = metadata;
     context.sections = sectionize(contentMarkdown);
     context.nextSectionIndex = 0;

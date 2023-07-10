@@ -1,8 +1,9 @@
-import TurndownService from "turndown";
+// import TurndownService from "turndown";
 import sectionize from "../helpers/sectionize.mjs";
 import removeCitations from "../helpers/rm-cite.mjs";
+import toMarkdown from "../helpers/to-markdown.mjs";
 
-const turndownService = new TurndownService();
+// const turndownService = new TurndownService();
 
 /**
  * Read content from ScienceDirect.
@@ -33,7 +34,7 @@ async function read(page, context) {
         contentHTML: main.querySelector("#body").innerHTML,
       };
     });
-    const contentMarkdown = turndownService.turndown(contentHTML);
+    const contentMarkdown = toMarkdown(contentHTML);
     context.metadata = metadata;
     context.sections = sectionize(
       contentMarkdown,
