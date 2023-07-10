@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.cm-editor {
+  @apply w-full h-full border border-stone-500;
+}
+.cm-editor .cm-gutter {
+  font-size: 14px;
+  font-family: "Noto Sans Mono", "SF Mono", "Courier New", Courier, monospace;
+}
+.cm-editor .cm-content {
+  font-size: 14px;
+  font-family: "Noto Sans Mono", "SF Mono", "Courier New", Courier, monospace;
+}

@@ -7,7 +7,8 @@ import classNames from "classnames";
 import { EditorView, basicSetup } from "codemirror";
 import { markdown } from "@codemirror/lang-markdown";
 import { EditorState } from "@codemirror/state";
-import "./page.css";
+import { Noto_Sans_Mono } from "next/font/google";
+import Link from "next/link";
 
 const bodySchema = z.object({
   metadata: z.object({
@@ -19,6 +20,8 @@ const bodySchema = z.object({
   }),
   sections: z.array(z.string()),
 });
+
+const notoSansMono = Noto_Sans_Mono({ subsets: ["latin"] });
 
 type Extraction = z.output<typeof bodySchema>;
 
@@ -38,8 +41,15 @@ export default function HomePage() {
   }, []);
   return (
     <>
+      <header className="flex-shrink-0 px-2 h-10 flex flex-row items-center border-b gap-8 border-stone-400">
+        <div className="font-bold text-xl">Chat with Browser</div>
+        <nav className="flex flex-row items-center gap-4">
+          <Link className="font-bold text-lg text-stone-600" href="/chat">Chat</Link>
+          <div className="font-bold text-lg text-red-600">Reader Test</div>
+        </nav>
+      </header>
       <form
-        className="flex-shrink-0 px-2 h-12 flex flex-row items-center gap-2 border-b border-stone-400"
+        className="flex-shrink-0 px-2 h-12 flex flex-row items-center gap-2 border-b-2 border-stone-400"
         onSubmit={handleSubmit(async (data) => {
           setIsPending(true);
           try {
@@ -63,10 +73,9 @@ export default function HomePage() {
           }
         })}
       >
-        <div className="font-bold text-lg">Reader Test</div>
-        <div>URL:</div>
+        <div className="font-medium">Enter a URL:</div>
         <input
-          className="flex-1 h-8 border border-stone-400 bg-transparent rounded"
+          className="flex-1 px-2 h-8 border border-stone-400 bg-transparent"
           type="url"
           {...register("url")}
           autoComplete="off"
@@ -75,19 +84,26 @@ export default function HomePage() {
           spellCheck="false"
         />
         <button
-          className="flex-shrink-0 px-2 py-1 bg-blue-600 text-white rounded disabled:bg-stone-600s"
+          className="flex-shrink-0 px-2 h-8 bg-blue-600 text-white disabled:bg-stone-600s"
           type="submit"
           disabled={isPending}
         >
-          Go
+          Read the URL
+        </button>
+        <button
+          className="flex-shrink-0 px-2 h-8 bg-stone-600 text-white disabled:bg-stone-600s"
+          type="button"
+          disabled={isPending}
+        >
+          Download as Markdown
         </button>
       </form>
       <div className="flex flex-1 min-h-0 flex-row">
         <aside
-          className="flex flex-col p-4 flex-shrink-0 border-r border-stone-400 gap-2"
-          style={{ width: "320px" }}
+          className="flex flex-col px-3.5 py-2 flex-shrink-0 border-r-2 border-stone-400 gap-2"
+          style={{ width: "480px" }}
         >
-          <header className="flex-shrink-0">
+          <header className="flex-shrink-0 border-b border-dashed border-stone-600">
             <div className="font-bold text-lg">Metadata</div>
           </header>
           <main className="flex-1 gap-2 min-h-0 overflow-y-auto flex flex-col">
@@ -118,11 +134,17 @@ export default function HomePage() {
             />
           </main>
         </aside>
-        <main className="p-4 flex-1 min-w-0 flex flex-col gap-2">
-          <header className="flex-shrink-0">
+        <main className="px-3.5 py-2 flex-1 min-w-0 flex flex-col gap-2">
+          <header className="flex-shrink-0 border-b border-dashed border-stone-600">
             <div className="font-bold text-lg">Content</div>
           </header>
-          <main ref={contentMainRef} className="flex-1 min-h-0 overflow-y-auto">
+          <main
+            ref={contentMainRef}
+            className={classNames(
+              "flex-1 min-h-0 overflow-y-auto",
+              notoSansMono.className
+            )}
+          >
             {/* {content ? (
               <pre className="font-mono whitespace-pre-wrap">
                 {content?.sections?.join("\n\n")}
