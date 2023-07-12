@@ -5,6 +5,7 @@ import { PaperAirplaneIcon } from "@heroicons/react/20/solid";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCallback } from "react";
+import { PaperPlaneIcon } from "@radix-ui/react-icons";
 
 export type ChatInputProps = {
   onSubmit: (data: ChatInputFormData) => void;
@@ -47,7 +48,7 @@ export default function ChatInput({ onSubmit }: ChatInputProps) {
           disabled={!isValid}
         >
           <span className="font-medium">Send</span>
-          <PaperAirplaneIcon className="ml-1 w-5 h-5" />
+          <PaperPlaneIcon className="ml-1" />
         </button>
       </div>
     </form>
