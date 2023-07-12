@@ -1,4 +1,4 @@
-import { type ChatGPTMessage } from "@/utils/ChatGPTMessage";
+import { type ChatGPTMessage } from "@/utils/ChatMessage";
 import { OpenAIStream, OpenAIStreamPayload } from "@/utils/OpenAIStream";
 import { NextResponse } from "next/server";
 
