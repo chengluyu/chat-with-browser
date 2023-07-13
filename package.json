@@ -28,7 +28,7 @@
     "eventsource-parser": "^1.0.0",
     "inquirer": "^9.2.7",
     "nanoid": "^4.0.2",
-    "next": "^13.4.8",
+    "next": "^13.4.9",
     "openai": "^3.3.0",
     "postcss": "^8.4.24",
     "puppeteer": "^20.7.4",
