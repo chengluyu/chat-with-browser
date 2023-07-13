@@ -1,4 +1,5 @@
 // import TurndownService from "turndown";
+import removeCitations from "@/helpers/rm-cite.mjs";
 import sectionize from "../helpers/sectionize.mjs";
 import toMarkdown from "../helpers/to-markdown.mjs";
 
@@ -30,14 +31,33 @@ async function read(page, context) {
       const abstract = articleBodyEl.querySelector(
         "section[data-title='Abstract']"
       ).innerText;
+      const articleInfoEl = document.body.querySelector(
+        "#article-info-content"
+      );
+      let identifiers = null;
+      if (articleInfoEl !== null) {
+        articleInfoEl.querySelector('abbr[title="Digital Object Identifier"]');
+        const identifierEl = articleInfoEl.parentElement.querySelector(
+          ".c-bibliographic-information__value"
+        );
+        identifiers = identifierEl.innerText;
+      }
       return {
-        metadata: { title, authors, abstract },
+        metadata: { identifiers, title, authors, abstract },
         contentHTML: articleBodyEl.querySelector(".main-content").innerHTML,
       };
     });
-    const contentMarkdown = toMarkdown(contentHTML);
+    const contentMarkdown = await toMarkdown(contentHTML);
     context.metadata = metadata;
-    context.sections = sectionize(contentMarkdown);
+    context.sections = sectionize(
+      contentMarkdown,
+      removeCitations.bind(
+        null,
+        /^(?:\d+|\d+[a-z](?:-[a-z]|, [a-z])*)$/,
+        /#(?:ref-CR\d+|Fig\d+|MOESM\d+)$/
+      )
+    );
+    console.log(contentMarkdown);
     context.nextSectionIndex = 0;
     return metadata;
   } else {

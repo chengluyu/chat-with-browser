@@ -13,10 +13,10 @@ import PageHeader from "@/components/PageHeader";
 
 const bodySchema = z.object({
   metadata: z.object({
-    identifiers: z.string(),
+    identifiers: z.string().nullable().optional(),
     title: z.string(),
     authors: z.string(),
-    source: z.string().optional(),
+    source: z.string().nullable().optional(),
     abstract: z.string(),
   }),
   sections: z.array(z.string()),
