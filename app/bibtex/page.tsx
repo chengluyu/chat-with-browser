@@ -54,10 +54,10 @@ export default function Page() {
   const [isReadingFiles, setIsReadingFiles] = useState<boolean>(false);
 
   const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsReadingFiles(false);
+    setIsReadingFiles(true);
     const entries = await readFiles(Array.from(event.target.files ?? []));
     setPendingEntries(entries);
-    setIsReadingFiles(true);
+    setIsReadingFiles(false);
   };
 
   const run = useCallback(
