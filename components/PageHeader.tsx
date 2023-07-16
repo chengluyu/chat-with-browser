@@ -29,6 +29,10 @@ export default function PageHeader() {
           <ActivityLogIcon className="mr-1 text-current" />
           BibTeX Converter
         </NavLink>
+        <NavLink href="/grammar">
+          <ActivityLogIcon className="mr-1 text-current" />
+          Grammar
+        </NavLink>
       </nav>
     </header>
   );
