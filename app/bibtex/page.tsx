@@ -135,6 +135,11 @@ export default function Page() {
     }
   };
 
+  const archiveAll = useCallback(() => {
+    setArchive((archive) => [...entries, ...archive]);
+    setEntries([]);
+  }, [entries, archive]);
+
   return (
     <>
       <PageHeader />
@@ -157,7 +162,7 @@ export default function Page() {
               <button
                 className="flex-shrink-0 px-2 h-8 bg-stone-600 text-white disabled:bg-stone-600s"
                 type="button"
-                onClick={onCopyClick}
+                onClick={archiveAll}
               >
                 Archive all
               </button>
