@@ -29,7 +29,7 @@ async function read(page, context) {
         el.id.match(/^(?:abstract-|ABS)\d+$/)
       );
       const mainSections = sections.filter((el) =>
-        el.id.match(/^(?:body-|sec-|S)\d+$/)
+        el.id.match(/^(?:body-|sec-|S|s)\d+$/)
       );
       const abstractHTML = abstract
         .map((el) => extractSection(el, 2))
@@ -61,7 +61,8 @@ async function read(page, context) {
             paragraphs.push(current.outerHTML);
           } else if (
             current.tagName === "DIV" &&
-            (current.id.startsWith("sec-") || current.id.match(/^S\d+$/))
+            (current.id.startsWith("sec-") ||
+              current.id.match(/^(?:S\d+|s\d+(?:\.\d+)*)$/))
           ) {
             const { headingHTML, contentHTML } = extractSection(
               current,
@@ -89,7 +90,8 @@ async function read(page, context) {
           /^(?:[\w -]+?(?:et al\.)? \d\d\d\d|Fig. \d+\w*|\d+|Table \d+)$/,
           /^(?:#[BR]\d+|\/pmc\/articles\/PMC\d+\/(?:figure|table)\/\w+\/)$/,
         ],
-        [/(?:\w+|\w+ and \w+|\w+ et al.), \d{4}$/, /#R\d+$/], // citations
+        [/^\d+$/, /^#r\d+$/i], // number citations
+        [/(?:\w+|\w+ and \w+|\w+ et al.), \d{4}$/, /#r\d+$/i], // citations
         [
           /Figures? \d+(?:[a-zA-Z](?:, [a-zA-Z])*)?$/,
           /\/pmc\/articles\/\w+\/figure\/\w+\/?$/,
