@@ -1,5 +1,5 @@
 // import TurndownService from "turndown";
-import removeCitations from "@/helpers/rm-cite.mjs";
+import removeCitations from "../helpers/rm-cite.mjs";
 import sectionize from "../helpers/sectionize.mjs";
 import toMarkdown from "../helpers/to-markdown.mjs";
 
@@ -28,9 +28,25 @@ async function read(page, context) {
       const authors = articleHeaderEl.querySelector(
         ".c-article-author-list"
       ).innerText;
-      const abstract = articleBodyEl.querySelector(
+      let abstract = null;
+
+      let abstractEl = articleBodyEl.querySelector(
         "section[data-title='Abstract']"
-      ).innerText;
+      );
+      if (abstractEl !== null) {
+        abstract = abstractEl.querySelector(
+          ".c-article-section__content"
+        ).textContent;
+      } else {
+        abstractEl = articleBodyEl.querySelector(
+          ".c-article-section#Abs1-section"
+        );
+        if (abstractEl !== null) {
+          abstract = abstractEl.querySelector(
+            ".c-article-section__content"
+          ).textContent;
+        }
+      }
       const articleInfoEl = document.body.querySelector(
         "#article-info-content"
       );
@@ -51,11 +67,12 @@ async function read(page, context) {
     context.metadata = metadata;
     context.sections = sectionize(
       contentMarkdown,
-      removeCitations.bind(
-        null,
-        /^(?:\d+|\d+[a-z](?:-[a-z]|, [a-z])*)$/,
-        /#(?:ref-CR\d+|Fig\d+|MOESM\d+)$/
-      )
+      removeCitations.bind(null, [
+        [
+          /^(?:\d+|\d+[a-z](?:-[a-z]|, [a-z])*)$/,
+          /#(?:ref-CR\d+|Fig\d+|MOESM\d+)$/,
+        ],
+      ])
     );
     console.log(contentMarkdown);
     context.nextSectionIndex = 0;
@@ -89,7 +106,7 @@ async function loadMore(page, context) {
 
 export default {
   name: "Nature",
-  urlPattern: /^https?:\/\/www.nature.com\/articles\/.+/,
+  urlPattern: /^https?:\/\/www\.nature\.com\/articles\/.+/,
   read,
   loadMore,
 };

@@ -2,20 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { z, ZodError } from "zod";
 import classNames from "classnames";
 import { EditorView, basicSetup } from "codemirror";
 import { markdown } from "@codemirror/lang-markdown";
 import { EditorState } from "@codemirror/state";
 import { Noto_Sans_Mono } from "next/font/google";
-import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
+import { generateErrorMessage } from "zod-error";
 
 const bodySchema = z.object({
   metadata: z.object({
     identifiers: z.string().nullable().optional(),
     title: z.string(),
-    authors: z.string(),
+    authors: z.union([z.string(), z.array(z.string())]),
     source: z.string().nullable().optional(),
     abstract: z.string(),
   }),
@@ -62,7 +62,11 @@ export default function HomePage() {
               })
             );
           } catch (e) {
-            alert(e instanceof Error ? e.message : String(e));
+            if (e instanceof ZodError) {
+              alert(generateErrorMessage(e.issues));
+            } else {
+              alert(e instanceof Error ? e.message : String(e));
+            }
           } finally {
             setIsPending(false);
           }
@@ -114,7 +118,11 @@ export default function HomePage() {
             />
             <MetadataField
               label="Authors"
-              value={content?.metadata.authors}
+              value={
+                Array.isArray(content?.metadata.authors)
+                  ? content?.metadata.authors.join(", ")
+                  : content?.metadata.authors
+              }
               multiline
             />
             <MetadataField

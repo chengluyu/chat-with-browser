@@ -25,9 +25,11 @@ async function read(page, context) {
       const authors = mainContentEl.querySelector(".fm-author").textContent;
 
       const sections = Array.from(mainContentEl.querySelectorAll(".tsec.sec"));
-      const abstract = sections.filter((el) => el.id.match(/^abstract-\d+$/));
+      const abstract = sections.filter((el) =>
+        el.id.match(/^(?:abstract-|ABS)\d+$/)
+      );
       const mainSections = sections.filter((el) =>
-        el.id.match(/^(?:body|sec)-\d+$/)
+        el.id.match(/^(?:body-|sec-|S)\d+$/)
       );
       const abstractHTML = abstract
         .map((el) => extractSection(el, 2))
@@ -51,7 +53,7 @@ async function read(page, context) {
       function extractSection(el, level) {
         const heading = el.querySelector(`h${level}`);
         const paragraphs = [];
-        let current = el.id.startsWith("abstract-")
+        let current = el.id.match(/^(?:abstract-|ABS)\d+$/)
           ? heading.nextElementSibling.firstElementChild
           : heading.nextElementSibling;
         while (current !== null) {
@@ -59,7 +61,7 @@ async function read(page, context) {
             paragraphs.push(current.outerHTML);
           } else if (
             current.tagName === "DIV" &&
-            current.id.startsWith("sec-")
+            (current.id.startsWith("sec-") || current.id.match(/^S\d+$/))
           ) {
             const { headingHTML, contentHTML } = extractSection(
               current,
@@ -82,11 +84,19 @@ async function read(page, context) {
     context.metadata = metadata;
     context.sections = sectionize(
       contentMarkdown,
-      removeCitations.bind(
-        null,
-        /^(?:[\w -]+?(?:et al\.)? \d\d\d\d|Fig. \d+\w+)$/,
-        /^(?:#[BR]\d+|\/pmc\/articles\/PMC\d+\/figure\/\w+\/)$/
-      )
+      removeCitations.bind(null, [
+        [
+          /^(?:[\w -]+?(?:et al\.)? \d\d\d\d|Fig. \d+\w*|\d+|Table \d+)$/,
+          /^(?:#[BR]\d+|\/pmc\/articles\/PMC\d+\/(?:figure|table)\/\w+\/)$/,
+        ],
+        [/(?:\w+ and \w+|\w+ et al.), \d{4}$/, /#R\d+$/], // citations
+        [
+          /Figures? \d+(?:[a-zA-Z](?:, [a-zA-Z])*)?$/,
+          /\/pmc\/articles\/\w+\/figure\/\w+\/?$/,
+        ], // figures
+        [/(?:Figure )?S\d+$/, /#SD\d+$/], // supplementary figures
+        [/./, /\/pmc\/articles\/\w+\/figure\/\w+\/?$/], // some malformed figures
+      ])
     );
     context.nextSectionIndex = 0;
     return metadata;

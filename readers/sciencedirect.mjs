@@ -34,11 +34,13 @@ async function read(page, context) {
         contentHTML: main.querySelector("#body").innerHTML,
       };
     });
-    const contentMarkdown = toMarkdown(contentHTML);
+    const contentMarkdown = await toMarkdown(contentHTML);
     context.metadata = metadata;
     context.sections = sectionize(
       contentMarkdown,
-      removeCitations.bind(null, /^(?:\d+|Fig. \d+)$/, /^(?:#bib\d+|#fig\d+)$/)
+      removeCitations.bind(null, [
+        [/^(?:\d+|Fig. \d+)$/, /^(?:#bib\d+|#fig\d+)$/],
+      ])
     );
     context.nextSectionIndex = 0;
     return metadata;
