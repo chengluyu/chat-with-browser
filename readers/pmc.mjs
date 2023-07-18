@@ -89,13 +89,16 @@ async function read(page, context) {
           /^(?:[\w -]+?(?:et al\.)? \d\d\d\d|Fig. \d+\w*|\d+|Table \d+)$/,
           /^(?:#[BR]\d+|\/pmc\/articles\/PMC\d+\/(?:figure|table)\/\w+\/)$/,
         ],
-        [/(?:\w+ and \w+|\w+ et al.), \d{4}$/, /#R\d+$/], // citations
+        [/(?:\w+|\w+ and \w+|\w+ et al.), \d{4}$/, /#R\d+$/], // citations
         [
           /Figures? \d+(?:[a-zA-Z](?:, [a-zA-Z])*)?$/,
           /\/pmc\/articles\/\w+\/figure\/\w+\/?$/,
         ], // figures
         [/(?:Figure )?S\d+$/, /#SD\d+$/], // supplementary figures
+        [/Fig. S\d+(?:[A-Z](?:(?:\/| and )[A-Z])*)?$/, /#SD\d+$/], // supplementary figures
+        [/Table S(?:I{1,3}|I?V|VI{3}|II?X|XI{1,3})$/, /#SD\d+$/], // supplementary tables
         [/./, /\/pmc\/articles\/\w+\/figure\/\w+\/?$/], // some malformed figures
+        [/./, /#SD\d+$/], // some malformed figures
       ])
     );
     context.nextSectionIndex = 0;

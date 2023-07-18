@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z, ZodError } from "zod";
 import classNames from "classnames";
@@ -32,6 +32,41 @@ export default function HomePage() {
   const [isPending, setIsPending] = useState(false);
   const editorRef = useRef<EditorView | null>(null);
   const contentMainRef = useRef<HTMLDivElement | null>(null);
+  const [summaryContent, setSummaryContent] = useState<string>("");
+  const summarize = useCallback(async () => {
+    const response = await fetch("/reader/summary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        markdownContent:
+          `# ${content?.metadata.title}\n\n` +
+          `## Abstract\n\n` +
+          `${content?.metadata.abstract}\n\n` +
+          `${content?.sections.join("\n\n")}\n\n`,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    // This data is a ReadableStream
+    const data = response.body;
+    if (!data) {
+      return;
+    }
+
+    const reader = data.getReader();
+    const decoder = new TextDecoder();
+
+    let messageBuffer = "";
+    for (let done = false; !done; ) {
+      const { value, done: doneReading } = await reader.read();
+      done = doneReading;
+      messageBuffer = messageBuffer + decoder.decode(value);
+      setSummaryContent(messageBuffer);
+    }
+  }, [content]);
   useEffect(() => {
     if (editorRef.current === null && contentMainRef.current !== null) {
       editorRef.current = new EditorView({
@@ -83,14 +118,22 @@ export default function HomePage() {
           spellCheck="false"
         />
         <button
-          className="flex-shrink-0 px-2 h-8 bg-blue-600 text-white disabled:bg-stone-600s"
+          className="flex-shrink-0 px-2 h-8 bg-blue-600 text-white disabled:bg-stone-600"
           type="submit"
           disabled={isPending}
         >
           Read the URL
         </button>
         <button
-          className="flex-shrink-0 px-2 h-8 bg-stone-600 text-white disabled:bg-stone-600s"
+          className="flex-shrink-0 px-2 h-8 bg-green-600 text-white disabled:bg-green-800"
+          type="button"
+          disabled={isPending}
+          onClick={summarize}
+        >
+          Summarize
+        </button>
+        <button
+          className="flex-shrink-0 px-2 h-8 bg-stone-600 text-white disabled:bg-stone-600"
           type="button"
           disabled={isPending}
         >
@@ -147,16 +190,19 @@ export default function HomePage() {
               "flex-1 min-h-0 overflow-y-auto",
               notoSansMono.className
             )}
-          >
-            {/* {content ? (
-              <pre className="font-mono whitespace-pre-wrap">
-                {content?.sections?.join("\n\n")}
-              </pre>
-            ) : (
-              <div className="text-stone-500">None</div>
-            )} */}
-          </main>
+          ></main>
         </main>
+        <aside
+          className="flex flex-col px-3.5 py-2 flex-shrink-0 border-l-2 border-stone-400 gap-2"
+          style={{ width: "480px" }}
+        >
+          <header className="flex-shrink-0 border-b border-dashed border-stone-600">
+            <div className="font-bold text-lg">Summary</div>
+          </header>
+          <main className="flex-1 gap-2 min-h-0 overflow-y-auto flex flex-col">
+            <div>{summaryContent}</div>
+          </main>
+        </aside>
       </div>
     </>
   );
