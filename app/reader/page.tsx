@@ -10,6 +10,11 @@ import { EditorState } from "@codemirror/state";
 import { Noto_Sans_Mono } from "next/font/google";
 import PageHeader from "@/components/PageHeader";
 import { generateErrorMessage } from "zod-error";
+import {
+  ClipboardCopyIcon,
+  MagnifyingGlassIcon,
+  PaperPlaneIcon,
+} from "@radix-ui/react-icons";
 
 const bodySchema = z.object({
   metadata: z.object({
@@ -33,6 +38,14 @@ export default function HomePage() {
   const editorRef = useRef<EditorView | null>(null);
   const contentMainRef = useRef<HTMLDivElement | null>(null);
   const [summaryContent, setSummaryContent] = useState<string>("");
+  const copyWithMetadata = useCallback(async () => {
+    navigator.clipboard.writeText(
+      `# ${content?.metadata.title}\n\n` +
+        `## Abstract\n\n` +
+        `${content?.metadata.abstract}\n\n` +
+        `${content?.sections.join("\n\n")}\n\n`
+    );
+  }, [content]);
   const summarize = useCallback(async () => {
     const response = await fetch("/reader/summary", {
       method: "POST",
@@ -118,26 +131,12 @@ export default function HomePage() {
           spellCheck="false"
         />
         <button
-          className="flex-shrink-0 px-2 h-8 bg-blue-600 text-white disabled:bg-stone-600"
+          className="flex-shrink-0 flex flex-row items-center gap-1 px-2 h-8 bg-blue-600 text-white disabled:bg-stone-600"
           type="submit"
           disabled={isPending}
         >
-          Read the URL
-        </button>
-        <button
-          className="flex-shrink-0 px-2 h-8 bg-green-600 text-white disabled:bg-green-800"
-          type="button"
-          disabled={isPending}
-          onClick={summarize}
-        >
-          Summarize
-        </button>
-        <button
-          className="flex-shrink-0 px-2 h-8 bg-stone-600 text-white disabled:bg-stone-600"
-          type="button"
-          disabled={isPending}
-        >
-          Download as Markdown
+          <MagnifyingGlassIcon />
+          <span>Read the URL</span>
         </button>
       </form>
       <div className="flex flex-1 min-h-0 flex-row">
@@ -181,8 +180,28 @@ export default function HomePage() {
           </main>
         </aside>
         <main className="px-3.5 py-2 flex-1 min-w-0 flex flex-col gap-2">
-          <header className="flex-shrink-0 border-b border-dashed border-stone-600">
+          <header className="flex-shrink-0 pb-1 flex flex-row items-center border-b border-dashed border-stone-600">
             <div className="font-bold text-lg">Content</div>
+            <div className="ml-auto flex flex-row items-center gap-2">
+              <button
+                className="flex-shrink-0 flex flex-row items-center gap-1 px-1 py-0.5 bg-green-600 text-white disabled:bg-green-800"
+                type="button"
+                disabled={isPending}
+                onClick={summarize}
+              >
+                <PaperPlaneIcon />
+                <span>Summarize</span>
+              </button>
+              <button
+                className="flex-shrink-0 flex flex-row items-center gap-1 px-1 py-0.5 bg-stone-600 text-white disabled:bg-stone-600"
+                type="button"
+                disabled={isPending}
+                onClick={copyWithMetadata}
+              >
+                <ClipboardCopyIcon />
+                <span>Copy with metadata</span>
+              </button>
+            </div>
           </header>
           <main
             ref={contentMainRef}

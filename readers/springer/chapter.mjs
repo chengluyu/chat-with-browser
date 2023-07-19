@@ -1,12 +1,9 @@
-// import TurndownService from "turndown";
-import sectionize from "../helpers/sectionize.mjs";
-import removeCitations from "../helpers/rm-cite.mjs";
-import toMarkdown from "../helpers/to-markdown.mjs";
-
-// const turndownService = new TurndownService();
+import sectionize from "../../helpers/sectionize.mjs";
+import removeCitations from "../../helpers/rm-cite.mjs";
+import toMarkdown from "../../helpers/to-markdown.mjs";
 
 /**
- * Read content from ScienceDirect.
+ * Read content from SpringerLink book chapters.
  * @param {import("puppeteer").Page} page the web page
  * @param {Record<string, unknown>} context the reader context
  * @returns {Promise<string>}
@@ -15,26 +12,26 @@ async function read(page, context) {
   // First time? Get metadata.
   if (!("metadata" in context)) {
     const { metadata, abstractHTML, contentHTML } = await page.evaluate(() => {
-      const main = document.querySelector("article[role='main']");
+      const main = document.querySelector(
+        "main.c-article-main-column > article"
+      );
       if (main === null) {
         return null;
       }
-      const journal = main.querySelector(
-        "#screen-reader-main-title > .article-dochead"
-      )?.textContent;
-      const title = main.querySelector(
-        "#screen-reader-main-title > .title-text"
-      ).textContent;
+      const title = main.querySelector("h1.c-article-title").textContent.trim();
       const authors = Array.from(
-        main.querySelectorAll("#author-group > .button-link-text")
-      ).map((el) => el.firstElementChild.innerText);
-      const abstractHTML = main.querySelector("#abstracts").innerHTML;
+        main.querySelectorAll(".c-article-author-list__item > .author-name")
+      ).map((el) => el.textContent.trim());
+      const abstractHTML = main.querySelector(
+        "section[data-title='Abstract'] div.c-article-section__content"
+      ).innerHTML;
       return {
-        metadata: { journal, title, authors },
+        metadata: { title, authors },
         abstractHTML,
-        contentHTML: main.querySelector("#body").innerHTML,
+        contentHTML: main.querySelector(".main-content").innerHTML,
       };
     });
+    // HTML to Markdown
     let contentMarkdown;
     try {
       metadata.abstract = await toMarkdown(abstractHTML);
@@ -54,9 +51,10 @@ async function read(page, context) {
       contentMarkdown,
       removeCitations.bind(null, [
         [/^(?:\d+|Fig. \d+)$/, /^(?:#bib\d+|#fig\d+)$/],
-        [null, /^#(?:bib|tbl(?:fn)?|fig)\d+$/i],
-        [/^$/, /./, "remove"],
-        // [null, /^\/science\/article\/pii\/\w+$/],
+        [null, /^#ref-CR\d+/],
+        [null, /^#(?:bib|tbl(?:fn)?|Fig)\d+$/],
+        [/^Full size image$/, /./, "remove"],
+        [/^figure \d+$/, /./],
       ])
     );
     context.nextSectionIndex = 0;
@@ -88,8 +86,8 @@ async function loadMore(page, context) {
 }
 
 export default {
-  name: "ScienceDirect",
-  urlPattern: /^https?:\/\/www.sciencedirect.com\/science\/article\/pii\/.+$/,
+  name: "SpringerLink Book Chapter",
+  urlPattern: /^https:\/\/link\.springer\.com\/chapter\/.*$/,
   read,
   loadMore,
 };

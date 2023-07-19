@@ -1,7 +1,7 @@
 import { unified } from "unified";
 import rehypeParse from "rehype-parse";
 import rehypeRemark from "rehype-remark";
-import remarkStringify from "remark-stringify";
+import remarkStringify from "@enkidevs/remark-stringify";
 
 /**
  * Converts HTML to Markdown.
@@ -12,7 +12,7 @@ export default async function toMarkdown(html) {
   const file = await unified()
     .use(rehypeParse)
     .use(rehypeRemark)
-    .use(remarkStringify)
+    .use(remarkStringify, { gfm: true })
     .process(html);
 
   return String(file);

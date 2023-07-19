@@ -1,7 +1,7 @@
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
-import remarkStringify from "remark-stringify";
+import remarkStringify from "@enkidevs/remark-stringify";
 // import { inspect } from "node:util";
 
 /**
@@ -34,7 +34,7 @@ export default function sectionize(markdown, preprocess) {
   }
 
   // Convert each section to markdown.
-  const processor = unified().use(remarkStringify);
+  const processor = unified().use(remarkStringify, { gfm: true });
   const sectionMarkdowns = sections.map((section) => {
     const markdown = processor.stringify({
       type: "root",

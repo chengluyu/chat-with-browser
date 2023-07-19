@@ -1,11 +1,22 @@
+import acs from "./acs.mjs";
 import bmc from "./bmc.mjs";
 import pmc from "./pmc.mjs";
 import fallback from "./fallback.mjs";
 import spandidos from "./spandidos.mjs";
 import scienceDirect from "./sciencedirect.mjs";
 import nature from "./nature.mjs";
+import springerLinkChapters from "./springer/chapter.mjs";
 
-const readers = [bmc, pmc, spandidos, scienceDirect, nature, fallback];
+const readers = [
+  acs,
+  bmc,
+  pmc,
+  spandidos,
+  scienceDirect,
+  nature,
+  springerLinkChapters,
+  fallback,
+];
 
 /**
  * Try to find a reader for the given web page.
