@@ -142,7 +142,7 @@ export default function HomePage() {
       <div className="flex flex-1 min-h-0 flex-row">
         <aside
           className="flex flex-col px-3.5 py-2 flex-shrink-0 border-r-2 border-stone-400 gap-2"
-          style={{ width: "480px" }}
+          style={{ width: "320px" }}
         >
           <header className="flex-shrink-0 border-b border-dashed border-stone-600">
             <div className="font-bold text-lg">Metadata</div>
@@ -209,11 +209,11 @@ export default function HomePage() {
               "flex-1 min-h-0 overflow-y-auto",
               notoSansMono.className
             )}
-          ></main>
+          />
         </main>
         <aside
           className="flex flex-col px-3.5 py-2 flex-shrink-0 border-l-2 border-stone-400 gap-2"
-          style={{ width: "480px" }}
+          style={{ width: "320px" }}
         >
           <header className="flex-shrink-0 border-b border-dashed border-stone-600">
             <div className="font-bold text-lg">Summary</div>

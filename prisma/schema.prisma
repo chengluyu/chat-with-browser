@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Conversation {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("conversations")
+}
+
+model ProofreadingDocument {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  sourceContent String   @map("source_content") @db.Text
+  suggestions   String   @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("proofreading_documents")
+}
+
+model ReaderDocument {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  url              String   @db.VarChar(512)
+  title            String   @db.VarChar(512)
+  authors          String   @db.VarChar(1024)
+  markdownAbstract String   @map("markdown_abstract") @db.Text
+  markdownContent  String   @map("markdown_content") @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("reader_documents")
+}
